@@ -1,0 +1,32 @@
+{% extends "main/base.html" %}
+
+{% block title %}
+    Projekt löschen
+{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <h1 class="h3">Projekt löschen</h1>
+
+    <p>
+        Soll das Projekt
+        <strong>{{ object.name }}</strong>
+        wirklich gelöscht werden?
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger">
+            Endgültig löschen
+        </button>
+
+        <a
+            href="{% url 'projekt-detail' object.pk %}"
+            class="btn btn-outline-secondary"
+        >
+            Abbrechen
+        </a>
+    </form>
+</div>
+{% endblock %}

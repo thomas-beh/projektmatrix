@@ -1,0 +1,34 @@
+{% extends "main/base.html" %}
+
+{% block title %}
+    Projekt bearbeiten
+{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <h1 class="h3 mb-4">
+        {% if object %}
+            Projekt bearbeiten
+        {% else %}
+            Projekt anlegen
+        {% endif %}
+    </h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary">
+            Speichern
+        </button>
+
+        <a
+            href="{% url 'projekt-liste' %}"
+            class="btn btn-outline-secondary"
+        >
+            Abbrechen
+        </a>
+    </form>
+</div>
+{% endblock %}
