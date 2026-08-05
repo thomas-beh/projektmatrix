@@ -1,0 +1,308 @@
+{% extends "main/base.html" %}
+
+{% block title %}
+    Projects
+{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Projects Overview</h1>
+            <p class="text-muted mb-0">
+                Overview of all Developement Projects
+            </p>
+        </div>
+
+        <a
+            href="{% url 'project-create' %}"
+            class="btn btn-primary"
+        >
+            Add Project
+        </a>
+    </div>
+
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <label for="search" class="form-label">
+                Search
+            </label>
+
+            <input
+                type="search"
+                id="search"
+                name="q"
+                class="form-control"
+                placeholder="Number, title, manager or group"
+                value="{{ current_search }}"
+            >
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <label for="status" class="form-label">
+                Status
+            </label>
+
+            <select
+                id="status"
+                name="status"
+                class="form-select"
+            >
+                <option value="">All statuses</option>
+
+                {% for value, label in status_choices %}
+                    <option
+                        value="{{ value }}"
+                        {% if current_status == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <label for="health" class="form-label">
+                Health
+            </label>
+
+            <select
+                id="health"
+                name="health"
+                class="form-select"
+            >
+                <option value="">All</option>
+
+                <option
+                    value="on_track"
+                    {% if current_health == "on_track" %}selected{% endif %}
+                >
+                    On Track
+                </option>
+
+                <option
+                    value="behind"
+                    {% if current_health == "behind" %}selected{% endif %}
+                >
+                    Behind Schedule
+                </option>
+
+                <option
+                    value="problem"
+                    {% if current_health == "problem" %}selected{% endif %}
+                >
+                    Problem
+                </option>
+
+                <option
+                    value="completed"
+                    {% if current_health == "completed" %}selected{% endif %}
+                >
+                    Completed
+                </option>
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-6">
+            <label for="sort" class="form-label">
+                Sort by
+            </label>
+
+            <select
+                id="sort"
+                name="sort"
+                class="form-select"
+            >
+                <option
+                    value="title"
+                    {% if current_sort == "title" %}selected{% endif %}
+                >
+                    Title A–Z
+                </option>
+
+                <option
+                    value="-title"
+                    {% if current_sort == "-title" %}selected{% endif %}
+                >
+                    Title Z–A
+                </option>
+
+                <option
+                    value="project_number"
+                    {% if current_sort == "project_number" %}selected{% endif %}
+                >
+                    Project Number
+                </option>
+
+                <option
+                    value="planned_end"
+                    {% if current_sort == "planned_end" %}selected{% endif %}
+                >
+                    Planned End – Earliest
+                </option>
+
+                <option
+                    value="-planned_end"
+                    {% if current_sort == "-planned_end" %}selected{% endif %}
+                >
+                    Planned End – Latest
+                </option>
+            </select>
+        </div>
+
+        <div class="col-lg-1 col-md-3">
+            <label for="page-size" class="form-label">
+                Rows
+            </label>
+
+            <select
+                id="page-size"
+                name="page_size"
+                class="form-select"
+            >
+                <option
+                    value="10"
+                    {% if current_page_size == "10" %}selected{% endif %}
+                >
+                    10
+                </option>
+
+                <option
+                    value="20"
+                    {% if current_page_size == "20" %}selected{% endif %}
+                >
+                    20
+                </option>
+
+                <option
+                    value="50"
+                    {% if current_page_size == "50" %}selected{% endif %}
+                >
+                    50
+                </option>
+            </select>
+        </div>
+
+        <div class="col-lg-2 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary">
+                Apply
+            </button>
+
+            <a
+                href="{% url 'project-list' %}"
+                class="btn btn-outline-secondary"
+            >
+                Reset
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Project Number</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Health</th>   <!-- Neue Spalte -->
+                    <th>Planned Start</th>
+                    <th>Planned End</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for project in projects %}
+            <tr>
+
+                <td>{{ project.project_number }}</td>
+
+                <td>
+                    <a href="{% url 'project-detail' project.pk %}">
+                        {{ project.title }}
+                    </a>
+                </td>
+
+                <td>{{ project.get_status_display }}</td>
+
+                <!-- HIER kommt das Badge hin -->
+                <td>
+
+                    {% if project.health_status == "problem" %}
+                        <span class="badge bg-danger">
+                            Problem
+                        </span>
+
+                    {% elif project.health_status == "behind" %}
+                        <span class="badge bg-warning text-dark">
+                            Behind Schedule
+                        </span>
+
+                    {% elif project.health_status == "completed" %}
+                        <span class="badge bg-success">
+                            Completed
+                        </span>
+
+                    {% else %}
+                        <span class="badge bg-light text-dark border">
+                            On Track
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>{{ project.planned_start|date:"Y-m-d"|default:"-" }}</td>
+
+                <td>{{ project.planned_end|date:"Y-m-d"|default:"-" }}</td>
+
+                <td>
+                    <a href="{% url 'project-detail' project.pk %}"
+                    class="btn btn-sm btn-outline-primary">
+                        Open
+                    </a>
+                </td>
+
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+    <nav aria-label="Project pages">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?{% if query_parameters %}{{ query_parameters }}&{% endif %}page={{ page_obj.previous_page_number }}"
+                    >
+                        Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Page {{ page_obj.number }}
+                    of {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?{% if query_parameters %}{{ query_parameters }}&{% endif %}page={{ page_obj.next_page_number }}"
+                    >
+                        Next
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "main/base.html" %}
+
+{% block title %}
+    {{ project.title }}
+{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <p class="text-muted mb-1">
+                {{ project.project_number }}
+            </p>
+
+            <h1 class="h3">
+                {{ project.title }}
+            </h1>
+        </div>
+
+        <div>
+            <a
+                href="{% url 'project-update' project.pk %}"
+                class="btn btn-primary"
+            >
+                Update
+            </a>
+
+            <a
+                href="{% url 'project-delete' project.pk %}"
+                class="btn btn-outline-danger"
+            >
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-3">Project Number</dt>
+        <dd class="col-sm-9">{{ project.project_number }}</dd>
+
+        <dt class="col-sm-3">Project Title</dt>
+        <dd class="col-sm-9">{{ project.title }}</dd>
+
+        <dt class="col-sm-3">Project Group</dt>
+        <dd class="col-sm-9">
+            {{ project.project_group|default:"–" }}
+        </dd>
+
+        <dt class="col-sm-3">Project Manager</dt>
+        <dd class="col-sm-9">
+            {{ project.project_manager|default:"–" }}
+        </dd>
+
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9">
+            {{ project.get_status_display }}
+        </dd>
+
+        <dt class="col-sm-3">Project Health</dt>
+        <dd class="col-sm-9">
+            {{ project.health_label }}
+        </dd>
+
+        <dt class="col-sm-3">Planned Start</dt>
+        <dd class="col-sm-9">
+            {{ project.planned_start|date:"Y-m-d"|default:"–" }}
+        </dd>
+
+        <dt class="col-sm-3">Planned End</dt>
+        <dd class="col-sm-9">
+            {{ project.planned_end|date:"Y-m-d"|default:"–" }}
+        </dd>
+
+        <dt class="col-sm-3">Actual Start</dt>
+        <dd class="col-sm-9">
+            {{ project.actual_start|date:"Y-m-d"|default:"–" }}
+        </dd>
+
+        <dt class="col-sm-3">Actual End</dt>
+        <dd class="col-sm-9">
+            {{ project.actual_end|date:"Y-m-d"|default:"–" }}
+        </dd>
+
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">
+            {{ project.description|default:"–"|linebreaks }}
+        </dd>
+    </dl>
+
+    <h2 class="h4 mt-5">Development Stages</h2>
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>Stage</th>
+                    <th>Status</th>
+                    <th>Responsible</th>
+                    <th>Hours Plan / Actual</th>
+                    <th>Material Cost Plan / Actual</th>
+                    <th>Planned End</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for project_stage in project.project_stages.all %}
+                    <tr>
+                        <td>{{ project_stage.stage.name }}</td>
+
+                        <td>
+                            {{ project_stage.get_status_display }}
+                        </td>
+
+                        <td>
+                            {{ project_stage.responsible_person|default:"–" }}
+                        </td>
+
+                        <td>
+                            {{ project_stage.planned_hours|default:"–" }}
+                            /
+                            {{ project_stage.actual_hours|default:"–" }}
+                        </td>
+
+                        <td>
+                            {{ project_stage.planned_material_cost|default:"–" }}
+                            /
+                            {{ project_stage.actual_material_cost|default:"–" }}
+                        </td>
+
+                        <td>
+                            {{ project_stage.planned_end|date:"Y-m-d"|default:"–" }}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            No development stages have been assigned yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{% url 'project-list' %}">
+        Back to Overview
+    </a>
+</div>
+{% endblock %}

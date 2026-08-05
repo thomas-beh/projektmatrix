@@ -1,38 +1,37 @@
 from django.urls import path
 
 from .views import (
-    ProjektBearbeitenView,
-    ProjektDetailView,
-    ProjektErstellenView,
-    ProjektListeView,
-    ProjektLoeschenView,
+    ProjectCreateView,
+    ProjectDeleteView,
+    ProjectDetailView,
+    ProjectListView,
+    ProjectUpdateView,
 )
-
 
 urlpatterns = [
     path(
         "",
-        ProjektListeView.as_view(),
-        name="projekt-liste",
+        ProjectListView.as_view(),
+        name="project-list",
     ),
     path(
-        "projekte/neu/",
-        ProjektErstellenView.as_view(),
-        name="projekt-erstellen",
+        "projects/new/",
+        ProjectCreateView.as_view(),
+        name="project-create",
     ),
     path(
-        "projekte/<int:pk>/",
-        ProjektDetailView.as_view(),
-        name="projekt-detail",
+        "projects/<int:pk>/",
+        ProjectDetailView.as_view(),
+        name="project-detail",
     ),
     path(
-        "projekte/<int:pk>/bearbeiten/",
-        ProjektBearbeitenView.as_view(),
-        name="projekt-bearbeiten",
+        "projects/<int:pk>/edit/",
+        ProjectUpdateView.as_view(),
+        name="project-update",
     ),
     path(
-        "projekte/<int:pk>/loeschen/",
-        ProjektLoeschenView.as_view(),
-        name="projekt-loeschen",
+        "projects/<int:pk>/delete/",
+        ProjectDeleteView.as_view(),
+        name="project-delete",
     ),
 ]

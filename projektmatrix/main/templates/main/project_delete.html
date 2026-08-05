@@ -1,31 +1,31 @@
 {% extends "main/base.html" %}
 
 {% block title %}
-    Projekt löschen
+    Delete Project
 {% endblock %}
 
 {% block content %}
 <div class="page-card">
-    <h1 class="h3">Projekt löschen</h1>
+    <h1 class="h3">Delete Project</h1>
 
     <p>
-        Soll das Projekt
+        Should the project
         <strong>{{ object.name }}</strong>
-        wirklich gelöscht werden?
+        be deleted?
     </p>
 
     <form method="post">
         {% csrf_token %}
 
         <button type="submit" class="btn btn-danger">
-            Endgültig löschen
+            Permamently Delete
         </button>
 
         <a
-            href="{% url 'projekt-detail' object.pk %}"
+            href="{% url 'project-detail' object.pk %}"
             class="btn btn-outline-secondary"
         >
-            Abbrechen
+            Cancel
         </a>
     </form>
 </div>

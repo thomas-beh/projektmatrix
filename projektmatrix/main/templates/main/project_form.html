@@ -1,16 +1,16 @@
 {% extends "main/base.html" %}
 
 {% block title %}
-    Projekt bearbeiten
+    Update Project
 {% endblock %}
 
 {% block content %}
 <div class="page-card">
     <h1 class="h3 mb-4">
         {% if object %}
-            Projekt bearbeiten
+            Update Project
         {% else %}
-            Projekt anlegen
+            Create Project
         {% endif %}
     </h1>
 
@@ -20,14 +20,14 @@
         {{ form.as_p }}
 
         <button type="submit" class="btn btn-primary">
-            Speichern
+            Save
         </button>
 
         <a
-            href="{% url 'projekt-liste' %}"
+            href="{% url 'project-list' %}"
             class="btn btn-outline-secondary"
         >
-            Abbrechen
+            Cancel
         </a>
     </form>
 </div>
