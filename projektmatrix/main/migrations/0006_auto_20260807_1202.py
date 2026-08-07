@@ -80,8 +80,11 @@ def create_stages(apps, schema_editor):
 
     for stage_data in STAGES:
         DevelopmentStage.objects.update_or_create(
-            code=stage_data["code"],
-            defaults=stage_data,
+            name=stage_data["name"],
+            defaults={
+                "code": stage_data["code"],
+                "order": stage_data["order"],
+            },
         )
 
 
