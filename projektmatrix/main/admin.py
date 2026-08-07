@@ -30,6 +30,7 @@ class ProjectAdmin(admin.ModelAdmin):
 class DevelopmentStageAdmin(admin.ModelAdmin):
     list_display = (
         "order",
+        "code",
         "name",
         "is_ce_ivd_only",
         "is_active",

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Project
+from .models import Project, ProjectStage
 
 
 class ProjectForm(forms.ModelForm):
@@ -10,6 +10,7 @@ class ProjectForm(forms.ModelForm):
         fields = [
             "project_number",
             "title",
+            "project_type",
             "project_group",
             "project_manager",
             "status",
@@ -28,6 +29,9 @@ class ProjectForm(forms.ModelForm):
             ),
             "title": forms.TextInput(
                 attrs={"class": "form-control"}
+            ),
+            "project_type": forms.Select(
+                attrs={"class": "form-select"}
             ),
             "project_group": forms.TextInput(
                 attrs={"class": "form-control"}
@@ -82,3 +86,134 @@ class ProjectForm(forms.ModelForm):
                 }
             ),
         }
+
+class ProjectStageForm(forms.ModelForm):
+    class Meta:
+        model = ProjectStage
+
+        fields = [
+            "status",
+            "responsible_person",
+            "planned_hours",
+            "actual_hours",
+            "planned_material_cost",
+            "actual_material_cost",
+            "planned_start",
+            "planned_end",
+            "actual_start",
+            "actual_end",
+            "notes",
+        ]
+
+        widgets = {
+            "status": forms.Select(
+                attrs={"class": "form-select"}
+            ),
+
+            "responsible_person": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+
+            "planned_hours": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "step": "0.25",
+                }
+            ),
+
+            "actual_hours": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "step": "0.25",
+                }
+            ),
+
+            "planned_material_cost": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "step": "0.01",
+                }
+            ),
+
+            "actual_material_cost": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                    "step": "0.01",
+                }
+            ),
+
+            "planned_start": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "planned_end": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "actual_start": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "actual_end": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                }
+            ),
+        }
+
+        #for correct date check
+        def clean(self):
+            cleaned_data = super().clean()
+
+            planned_start = cleaned_data.get("planned_start")
+            planned_end = cleaned_data.get("planned_end")
+
+            actual_start = cleaned_data.get("actual_start")
+            actual_end = cleaned_data.get("actual_end")
+
+            if (
+                planned_start
+                and planned_end
+                and planned_end < planned_start
+            ):
+                self.add_error(
+                    "planned_end",
+                    "Planned end cannot be before planned start.",
+                )
+
+            if (
+                actual_start
+                and actual_end
+                and actual_end < actual_start
+            ):
+                self.add_error(
+                    "actual_end",
+                    "Actual end cannot be before actual start.",
+                )
+
+            return cleaned_data

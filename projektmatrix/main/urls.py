@@ -5,6 +5,7 @@ from .views import (
     ProjectDeleteView,
     ProjectDetailView,
     ProjectListView,
+    ProjectStageUpdateView,
     ProjectUpdateView,
 )
 
@@ -33,5 +34,10 @@ urlpatterns = [
         "projects/<int:pk>/delete/",
         ProjectDeleteView.as_view(),
         name="project-delete",
+    ),
+    path(
+    "project-stages/<int:pk>/edit/",
+    ProjectStageUpdateView.as_view(),
+    name="project-stage-update",
     ),
 ]

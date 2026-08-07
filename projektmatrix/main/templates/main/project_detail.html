@@ -99,6 +99,7 @@
                     <th>Hours Plan / Actual</th>
                     <th>Material Cost Plan / Actual</th>
                     <th>Planned End</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
 
@@ -129,6 +130,14 @@
 
                         <td>
                             {{ project_stage.planned_end|date:"Y-m-d"|default:"–" }}
+                        </td>
+                        <td>
+                            <a
+                                href="{% url 'project-stage-update' project_stage.pk %}"
+                                class="btn btn-sm btn-outline-primary"
+                            >
+                                Edit
+                            </a>
                         </td>
                     </tr>
                 {% empty %}

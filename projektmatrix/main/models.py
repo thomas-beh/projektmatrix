@@ -4,6 +4,18 @@ from django.utils import timezone
 
 
 class Project(models.Model):
+    PROJECT_TYPE_CHOICES = [
+        ("general", "General Development Project"),
+        ("ivd", "IVD Kit"),
+    ]
+
+    project_type = models.CharField(
+        max_length=20,
+        choices=PROJECT_TYPE_CHOICES,
+        default="general",
+        verbose_name="Project Type",
+    )
+
     STATUS_CHOICES = [
         ("idea", "Project Idea"),
         ("active", "Active"),
@@ -129,6 +141,11 @@ class Project(models.Model):
 
 #Model for the development stages
 class DevelopmentStage(models.Model):
+    code = models.SlugField(
+        max_length=60,
+        unique=True,
+    )
+
     name = models.CharField(
         max_length=200,
         unique=True,

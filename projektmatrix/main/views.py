@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.db import transaction
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -9,8 +10,8 @@ from django.views.generic import (
     UpdateView,
 )
 
-from .forms import ProjectForm
-from .models import Project
+from .forms import ProjectForm, ProjectStageForm
+from .models import DevelopmentStage, Project, ProjectStage
 
 
 class ProjectListView(ListView):
@@ -121,6 +122,34 @@ class ProjectCreateView(CreateView):
     form_class = ProjectForm
     template_name = "main/project_form.html"
 
+    @transaction.atomic
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        stages = DevelopmentStage.objects.filter(
+            is_active=True
+        )
+
+        if self.object.project_type == "general":
+            stages = stages.exclude(
+                code="post-market-surveillance"
+            )
+
+        project_stages = [
+            ProjectStage(
+                project=self.object,
+                stage=stage,
+            )
+            for stage in stages
+        ]
+
+        ProjectStage.objects.bulk_create(
+            project_stages,
+            ignore_conflicts=True,
+        )
+
+        return response
+
 
 class ProjectUpdateView(UpdateView):
     model = Project
@@ -132,3 +161,15 @@ class ProjectDeleteView(DeleteView):
     model = Project
     template_name = "main/project_delete.html"
     success_url = reverse_lazy("project-list")
+
+class ProjectStageUpdateView(UpdateView):
+    model = ProjectStage
+    form_class = ProjectStageForm
+    template_name = "main/project_stage_form.html"
+    context_object_name = "project_stage"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "project-detail",
+            kwargs={"pk": self.object.project.pk},
+        )
