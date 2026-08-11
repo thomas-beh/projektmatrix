@@ -1,0 +1,181 @@
+<section class="gantt-section">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2 class="h4 mb-1">
+                Project Timeline
+            </h2>
+
+            {% if gantt_available %}
+                <p class="text-muted mb-0">
+                    {{ gantt_start|date:"Y-m-d" }}
+                    –
+                    {{ gantt_end|date:"Y-m-d" }}
+                </p>
+            {% endif %}
+        </div>
+
+    </div>
+
+
+    {% if gantt_available %}
+
+        <div class="gantt-scroll">
+
+            <div class="gantt-chart">
+
+                <!-- Calendar header -->
+                <div
+                    class="gantt-grid gantt-header"
+                    style="
+                        grid-template-columns:
+                        260px
+                        90px
+                        repeat({{ gantt_total_days }}, 32px);
+                    "
+                >
+
+                    <div class="gantt-fixed-header">
+                        Development Stage
+                    </div>
+
+                    <div class="gantt-fixed-header">
+                        Duration
+                    </div>
+
+
+                    {% for day in gantt_days %}
+
+                        <div
+                            class="
+                                gantt-day-header
+                                {% if day.is_weekend %}
+                                    gantt-weekend
+                                {% endif %}
+                            "
+                        >
+
+                            <span class="gantt-weekday">
+                                {{ day.weekday }}
+                            </span>
+
+                            <span class="gantt-date">
+                                {{ day.day }}
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- Project Start -->
+                <div
+                    class="gantt-grid gantt-row"
+                    style="
+                        grid-template-columns:
+                        260px
+                        90px
+                        repeat({{ gantt_total_days }}, 32px);
+                    "
+                >
+
+                    <div class="gantt-stage-name">
+                        Project Start
+                    </div>
+
+                    <div class="gantt-duration">
+                        –
+                    </div>
+
+                    <div
+                        class="gantt-milestone"
+                        style="
+                            grid-column: {{ project_start_column }};
+                            grid-row: 1;
+                        "
+                        title="Project Start"
+                    >
+                        ◆
+                    </div>
+
+                </div>
+
+
+                <!-- Development stages -->
+                {% for row in gantt_rows %}
+
+                    <div
+                        class="gantt-grid gantt-row"
+                        style="
+                            grid-template-columns:
+                            260px
+                            90px
+                            repeat({{ gantt_total_days }}, 32px);
+                        "
+                    >
+
+                        <div class="gantt-stage-name">
+                            {{ row.project_stage.stage.name }}
+                        </div>
+
+                        <div class="gantt-duration">
+                            ...
+                        </div>
+
+
+                        {% for day in gantt_days %}
+
+                            <div
+                                class="
+                                    gantt-day-cell
+                                    {% if day.is_weekend %}
+                                        gantt-weekend
+                                    {% endif %}
+                                "
+                                style="
+                                    grid-column: {{ forloop.counter|add:2 }};
+                                    grid-row: 1;
+                                "
+                            >
+                            </div>
+
+                        {% endfor %}
+
+
+                        {% if row.has_schedule %}
+
+                            <div
+                                class="gantt-bar"
+                                style="
+                                    grid-column:
+                                    {{ row.start_column }}
+                                    /
+                                    span {{ row.duration_days }};
+
+                                    grid-row: 1;
+                                "
+                            >
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <div class="alert alert-secondary">
+            No planned stage dates are available yet.
+        </div>
+
+    {% endif %}
+
+</section>

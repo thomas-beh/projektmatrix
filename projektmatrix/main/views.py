@@ -12,6 +12,7 @@ from django.views.generic import (
 
 from .forms import ProjectForm, ProjectStageForm
 from .models import DevelopmentStage, Project, ProjectStage
+from datetime import timedelta
 
 
 class ProjectListView(ListView):
@@ -108,6 +109,7 @@ class ProjectListView(ListView):
             "10",
         )
 
+
         return context
 
 
@@ -116,6 +118,206 @@ class ProjectDetailView(DetailView):
     template_name = "main/project_detail.html"
     context_object_name = "project"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        project = self.object
+
+        project_stages = (
+            project.project_stages
+            .select_related("stage")
+            .order_by("stage__order")
+        )
+
+        # Project Summary
+
+        total_planned_hours = sum(
+            stage.planned_hours or 0
+            for stage in project_stages
+        )
+
+        total_actual_hours = sum(
+            stage.actual_hours or 0
+            for stage in project_stages
+        )
+
+        total_planned_cost = sum(
+            stage.planned_material_cost or 0
+            for stage in project_stages
+        )
+
+        total_actual_cost = sum(
+            stage.actual_material_cost or 0
+            for stage in project_stages
+        )
+
+        scheduled_stages = [
+            stage
+            for stage in project_stages
+            if stage.planned_start and stage.planned_end
+        ]
+
+        if scheduled_stages:
+            earliest_planned_start = min(
+                stage.planned_start
+                for stage in scheduled_stages
+            )
+
+            latest_planned_end = max(
+                stage.planned_end
+                for stage in scheduled_stages
+            )
+
+            total_planned_duration = (
+                latest_planned_end - earliest_planned_start
+            ).days + 1
+        else:
+            total_planned_duration = None
+
+
+        actual_stages = [
+            stage
+            for stage in project_stages
+            if stage.actual_start and stage.actual_end
+        ]
+
+        if actual_stages:
+            earliest_actual_start = min(
+                stage.actual_start
+                for stage in actual_stages
+            )
+
+            latest_actual_end = max(
+                stage.actual_end
+                for stage in actual_stages
+            )
+
+            total_actual_duration = (
+                latest_actual_end - earliest_actual_start
+            ).days + 1
+        else:
+            total_actual_duration = None
+
+        context["total_planned_hours"] = total_planned_hours
+        context["total_actual_hours"] = total_actual_hours
+
+        context["total_planned_cost"] = total_planned_cost
+        context["total_actual_cost"] = total_actual_cost
+
+        context["total_planned_duration"] = total_planned_duration
+        context["total_actual_duration"] = total_actual_duration
+
+        scheduled_stages = [
+            project_stage
+            for project_stage in project_stages
+            if project_stage.planned_start
+            and project_stage.planned_end
+        ]
+
+        if not scheduled_stages:
+            context["gantt_available"] = False
+            return context
+
+        stage_start = min(
+            project_stage.planned_start
+            for project_stage in scheduled_stages
+        )
+
+        if project.planned_start:
+            gantt_start = min(
+                project.planned_start,
+                stage_start,
+            )
+        else:
+            gantt_start = stage_start
+
+        stage_end = max(
+            project_stage.planned_end
+            for project_stage in scheduled_stages
+        )
+
+        if project.planned_start:
+            project_start_offset = (
+                project.planned_start - gantt_start
+            ).days
+
+            context["project_start_column"] = (
+                project_start_offset + 3
+            )
+        else:
+            context["project_start_column"] = 3
+
+        if project.planned_end:
+            gantt_end = max(
+                project.planned_end,
+                stage_end,
+            )
+        else:
+            gantt_end = stage_end
+
+        gantt_total_days = (
+            gantt_end - gantt_start
+        ).days + 1
+
+        gantt_days = []
+
+        current_date = gantt_start
+
+        while current_date <= gantt_end:
+            gantt_days.append(
+                {
+                    "date": current_date,
+                    "weekday": current_date.strftime("%a"),
+                    "day": current_date.strftime("%d"),
+                    "is_weekend": current_date.weekday() >= 5,
+                }
+            )
+
+            current_date += timedelta(days=1)
+
+        gantt_rows = []
+
+        for project_stage in project_stages:
+
+            if (
+                project_stage.planned_start
+                and project_stage.planned_end
+            ):
+                offset_days = (
+                    project_stage.planned_start
+                    - gantt_start
+                ).days
+
+                duration_days = (
+                    project_stage.planned_end
+                    - project_stage.planned_start
+                ).days + 1
+
+                gantt_rows.append(
+                    {
+                        "project_stage": project_stage,
+                        "has_schedule": True,
+                        "start_column": offset_days + 3,
+                        "duration_days": duration_days,
+                    }
+                )
+
+            else:
+                gantt_rows.append(
+                    {
+                        "project_stage": project_stage,
+                        "has_schedule": False,
+                    }
+                )
+
+        context["gantt_available"] = True
+        context["gantt_start"] = gantt_start
+        context["gantt_end"] = gantt_end
+        context["gantt_total_days"] = gantt_total_days
+        context["gantt_days"] = gantt_days
+        context["gantt_rows"] = gantt_rows
+
+        return context
 
 class ProjectCreateView(CreateView):
     model = Project

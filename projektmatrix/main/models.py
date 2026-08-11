@@ -275,6 +275,23 @@ class ProjectStage(models.Model):
         blank=True,
     )
 
+    @property
+    def planned_duration_days(self):
+        if self.planned_start and self.planned_end:
+            return (self.planned_end - self.planned_start).days + 1
+
+        return None
+
+    @property
+    def actual_duration_days(self):
+        if self.actual_start and self.actual_end:
+            return (self.actual_end - self.actual_start).days + 1
+
+        return None
+
+    def __str__(self):
+        return f"{self.project} – {self.stage}"
+
     class Meta:
         ordering = ["stage__order"]
         constraints = [

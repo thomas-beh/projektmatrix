@@ -11,3 +11,136 @@ body {
 .table th {
     white-space: nowrap;
 }
+
+.gantt-section {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+}
+
+.gantt-scroll {
+    overflow-x: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background: white;
+}
+
+.gantt-chart {
+    width: max-content;
+    min-width: 100%;
+}
+
+.gantt-grid {
+    display: grid;
+    min-height: 48px;
+}
+
+.gantt-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    border-bottom: 2px solid #adb5bd;
+}
+
+.gantt-row {
+    border-bottom: 1px solid #e9ecef;
+}
+
+.gantt-row:last-child {
+    border-bottom: none;
+}
+
+.gantt-fixed-header {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    font-weight: 600;
+    background: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+}
+
+.gantt-stage-name {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: white;
+    border-right: 1px solid #dee2e6;
+    z-index: 2;
+}
+
+.gantt-stage-number {
+    margin-right: 0.4rem;
+    font-weight: 600;
+}
+
+.gantt-duration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-right: 1px solid #dee2e6;
+    font-size: 0.875rem;
+    z-index: 2;
+}
+
+.gantt-day-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 32px;
+
+    background: #f8f9fa;
+
+    border-right: 1px solid #dee2e6;
+
+    font-size: 0.75rem;
+}
+
+.gantt-weekday {
+    font-size: 0.65rem;
+    color: #6c757d;
+}
+
+.gantt-date {
+    font-weight: 600;
+}
+
+.gantt-weekend {
+    background: #eeeeee;
+}
+
+.gantt-bar {
+    align-self: center;
+
+    height: 24px;
+
+    margin-left: 2px;
+    margin-right: 2px;
+
+    border-radius: 4px;
+
+    background: #0d6efd;
+
+    z-index: 3;
+}
+
+.gantt-milestone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.25rem;
+
+    z-index: 3;
+}
+
+.gantt-day-cell {
+    grid-row: 1;
+
+    border-right: 1px solid #f0f0f0;
+
+    min-width: 32px;
+
+    z-index: 1;
+}
