@@ -122,7 +122,12 @@
                         </div>
 
                         <div class="gantt-duration">
-                            ...
+                            {% if row.has_schedule %}
+                                {{ row.duration_days }}
+                                day{{ row.duration_days|pluralize }}
+                            {% else %}
+                                –
+                            {% endif %}
                         </div>
 
 
