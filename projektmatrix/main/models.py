@@ -303,3 +303,43 @@ class ProjectStage(models.Model):
 
     def __str__(self):
         return f"{self.project} – {self.stage}"
+
+from django.core.validators import FileExtensionValidator
+
+
+class ProjectStageAttachment(models.Model):
+    project_stage = models.ForeignKey(
+        ProjectStage,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+
+    file = models.FileField(
+        upload_to="project_stage_attachments/",
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=[
+                    "pdf",
+                    "doc",
+                    "docx",
+                    "xls",
+                    "xlsx",
+                    "png",
+                    "jpg",
+                    "jpeg",
+                ]
+            )
+        ],
+    )
+
+    description = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def __str__(self):
+        return self.file.name

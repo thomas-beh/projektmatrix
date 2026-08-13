@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect
 from django.db import transaction
 from django.utils import timezone
 from django.urls import reverse_lazy
@@ -10,8 +11,17 @@ from django.views.generic import (
     UpdateView,
 )
 
-from .forms import ProjectForm, ProjectStageForm
-from .models import DevelopmentStage, Project, ProjectStage
+from .forms import (
+    ProjectForm,
+    ProjectStageForm,
+    ProjectStageAttachmentForm,
+)
+from .models import (
+    DevelopmentStage,
+    Project,
+    ProjectStage,
+    ProjectStageAttachment,
+)
 from datetime import timedelta
 
 
@@ -375,3 +385,39 @@ class ProjectStageUpdateView(UpdateView):
             "project-detail",
             kwargs={"pk": self.object.project.pk},
         )
+
+class ProjectStageDetailView(DetailView):
+    model = ProjectStage
+    template_name = "main/project_stage_detail.html"
+    context_object_name = "project_stage"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["attachment_form"] = (
+            ProjectStageAttachmentForm()
+        )
+
+        return context
+
+def project_stage_attachment_upload(request, pk):
+    project_stage = get_object_or_404(
+        ProjectStage,
+        pk=pk,
+    )
+
+    if request.method == "POST":
+        form = ProjectStageAttachmentForm(
+            request.POST,
+            request.FILES,
+        )
+
+        if form.is_valid():
+            attachment = form.save(commit=False)
+            attachment.project_stage = project_stage
+            attachment.save()
+
+    return redirect(
+        "project-stage-detail",
+        pk=project_stage.pk,
+    )

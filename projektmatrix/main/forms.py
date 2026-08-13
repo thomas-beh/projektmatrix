@@ -1,6 +1,10 @@
 from django import forms
 
-from .models import Project, ProjectStage
+from .models import (
+    Project,
+    ProjectStage,
+    ProjectStageAttachment,
+)
 
 
 class ProjectForm(forms.ModelForm):
@@ -217,3 +221,24 @@ class ProjectStageForm(forms.ModelForm):
                 )
 
             return cleaned_data
+
+class ProjectStageAttachmentForm(forms.ModelForm):
+    class Meta:
+        model = ProjectStageAttachment
+
+        fields = [
+            "file",
+            "description",
+        ]
+
+        widgets = {
+            "file": forms.FileInput(
+                attrs={"class": "form-control"}
+            ),
+            "description": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Optional description",
+                }
+            ),
+        }

@@ -7,6 +7,8 @@ from .views import (
     ProjectListView,
     ProjectStageUpdateView,
     ProjectUpdateView,
+    ProjectStageDetailView,
+    project_stage_attachment_upload,
 )
 
 urlpatterns = [
@@ -39,5 +41,15 @@ urlpatterns = [
     "project-stages/<int:pk>/edit/",
     ProjectStageUpdateView.as_view(),
     name="project-stage-update",
+    ),
+    path(
+    "project-stages/<int:pk>/",
+    ProjectStageDetailView.as_view(),
+    name="project-stage-detail",
+    ),
+    path(
+    "project-stages/<int:pk>/attachments/upload/",
+    project_stage_attachment_upload,
+    name="project-stage-attachment-upload",
     ),
 ]
