@@ -4,6 +4,7 @@ from .models import (
     Project,
     ProjectStage,
     ProjectStageAttachment,
+    WorkStep,
 )
 
 
@@ -242,3 +243,100 @@ class ProjectStageAttachmentForm(forms.ModelForm):
                 }
             ),
         }
+
+class WorkStepForm(forms.ModelForm):
+    class Meta:
+        model = WorkStep
+
+        fields = [
+            "title",
+            "order",
+            "planned_start",
+            "planned_end",
+            "actual_start",
+            "actual_end",
+            "notes",
+        ]
+
+        widgets = {
+            "title": forms.TextInput(
+                attrs={"class": "form-control"}
+            ),
+
+            "order": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0",
+                }
+            ),
+
+            "planned_start": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "planned_end": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "actual_start": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "actual_end": forms.DateInput(
+                format="%Y-%m-%d",
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                },
+            ),
+
+            "notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                }
+            ),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        planned_start = cleaned_data.get("planned_start")
+        planned_end = cleaned_data.get("planned_end")
+
+        actual_start = cleaned_data.get("actual_start")
+        actual_end = cleaned_data.get("actual_end")
+
+        if (
+            planned_start
+            and planned_end
+            and planned_end < planned_start
+        ):
+            self.add_error(
+                "planned_end",
+                "Planned end cannot be before planned start.",
+            )
+
+        if (
+            actual_start
+            and actual_end
+            and actual_end < actual_start
+        ):
+            self.add_error(
+                "actual_end",
+                "Actual end cannot be before actual start.",
+            )
+
+        return cleaned_data

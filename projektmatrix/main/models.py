@@ -343,3 +343,79 @@ class ProjectStageAttachment(models.Model):
 
     def __str__(self):
         return self.file.name
+
+class WorkStep(models.Model):
+    project_stage = models.ForeignKey(
+        ProjectStage,
+        on_delete=models.CASCADE,
+        related_name="work_steps",
+    )
+
+    title = models.CharField(
+        max_length=200,
+        verbose_name="Work Step",
+    )
+
+    order = models.PositiveIntegerField(
+        default=0,
+    )
+
+    planned_start = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Planned Start",
+    )
+
+    planned_end = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Planned End",
+    )
+
+    actual_start = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Actual Start",
+    )
+
+    actual_end = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Actual End",
+    )
+
+    notes = models.TextField(
+        blank=True,
+    )
+
+    class Meta:
+        ordering = [
+            "order",
+            "id",
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.project_stage.stage.name} – "
+            f"{self.title}"
+        )
+
+    @property
+    def planned_duration_days(self):
+        if self.planned_start and self.planned_end:
+            return (
+                self.planned_end
+                - self.planned_start
+            ).days + 1
+
+        return None
+
+    @property
+    def actual_duration_days(self):
+        if self.actual_start and self.actual_end:
+            return (
+                self.actual_end
+                - self.actual_start
+            ).days + 1
+
+        return None

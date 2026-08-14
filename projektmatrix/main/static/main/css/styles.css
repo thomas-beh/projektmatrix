@@ -111,18 +111,36 @@ body {
 }
 
 .gantt-bar {
-    align-self: center;
-
-    height: 24px;
-
     margin-left: 2px;
     margin-right: 2px;
-
     border-radius: 4px;
+    z-index: 3;
+}
+
+
+/* Planned timeline */
+
+.gantt-bar-planned {
+    height: 10px;
+
+    align-self: start;
+
+    margin-top: 9px;
 
     background: #0d6efd;
+}
 
-    z-index: 3;
+
+/* Actual timeline */
+
+.gantt-bar-actual {
+    height: 10px;
+
+    align-self: end;
+
+    margin-bottom: 9px;
+
+    background: #198754;
 }
 
 .gantt-milestone {
@@ -143,4 +161,25 @@ body {
     min-width: 32px;
 
     z-index: 1;
+}
+
+.gantt-stage-main {
+    font-weight: 600;
+    background: #f8f9fa;
+}
+
+
+.gantt-work-step-name {
+    padding-left: 2rem;
+    font-size: 0.875rem;
+}
+
+
+.gantt-work-step-marker {
+    margin-right: 0.5rem;
+    color: #6c757d;
+}
+
+.gantt-row-stage {
+    border-top: 2px solid #dee2e6;
 }

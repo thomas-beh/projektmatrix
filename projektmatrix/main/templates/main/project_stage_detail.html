@@ -132,6 +132,99 @@
         {% endif %}
     </div>
 
+    <h2 class="h5 mt-5">
+        Work Steps
+    </h2>
+
+    <div class="d-flex justify-content-end mb-3">
+
+        <a
+            href="{% url 'work-step-create' project_stage.pk %}"
+            class="btn btn-outline-primary"
+        >
+            Add Work Step
+        </a>
+
+    </div>
+
+
+    {% if project_stage.work_steps.all %}
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered align-middle">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Work Step</th>
+                        <th>Planned Period</th>
+                        <th>Actual Period</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for work_step in project_stage.work_steps.all %}
+
+                        <tr>
+
+                            <td>
+                                {{ work_step.order }}
+                            </td>
+
+                            <td>
+                                {{ work_step.title }}
+                            </td>
+
+                            <td>
+                                {{ work_step.planned_start|date:"Y-m-d"|default:"–" }}
+                                –
+                                {{ work_step.planned_end|date:"Y-m-d"|default:"–" }}
+                            </td>
+
+                            <td>
+                                {{ work_step.actual_start|date:"Y-m-d"|default:"–" }}
+                                –
+                                {{ work_step.actual_end|date:"Y-m-d"|default:"–" }}
+                            </td>
+
+                            <td class="text-nowrap">
+
+                                <a
+                                    href="{% url 'work-step-update' work_step.pk %}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >
+                                    Edit
+                                </a>
+
+                                <a
+                                    href="{% url 'work-step-delete' work_step.pk %}"
+                                    class="btn btn-sm btn-outline-danger"
+                                >
+                                    Delete
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <p class="text-muted">
+            No work steps have been added.
+        </p>
+
+    {% endif %}
 
     <h2 class="h5 mt-5">
         Attachments

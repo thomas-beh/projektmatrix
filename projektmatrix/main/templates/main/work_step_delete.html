@@ -1,0 +1,41 @@
+{% extends "main/base.html" %}
+
+{% block title %}
+    Delete Work Step
+{% endblock %}
+
+{% block content %}
+
+<div class="page-card">
+
+    <h1 class="h3">
+        Delete Work Step
+    </h1>
+
+    <p>
+        Delete
+        <strong>{{ work_step.title }}</strong>?
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            class="btn btn-danger"
+        >
+            Delete
+        </button>
+
+        <a
+            href="{% url 'project-stage-detail' work_step.project_stage.pk %}"
+            class="btn btn-outline-secondary"
+        >
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

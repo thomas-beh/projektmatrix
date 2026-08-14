@@ -15,12 +15,14 @@ from .forms import (
     ProjectForm,
     ProjectStageForm,
     ProjectStageAttachmentForm,
+    WorkStepForm,
 )
 from .models import (
     DevelopmentStage,
     Project,
     ProjectStage,
     ProjectStageAttachment,
+    WorkStep,
 )
 from datetime import timedelta
 
@@ -129,6 +131,7 @@ class ProjectDetailView(DetailView):
     context_object_name = "project"
 
     def get_context_data(self, **kwargs):
+        timeline_dates = []
         context = super().get_context_data(**kwargs)
 
         project = self.object
@@ -136,8 +139,77 @@ class ProjectDetailView(DetailView):
         project_stages = (
             project.project_stages
             .select_related("stage")
+            .prefetch_related("work_steps")
             .order_by("stage__order")
         )
+
+        # Timeline
+        if project.planned_start:
+            timeline_dates.append(project.planned_start)
+
+        if project.planned_end:
+            timeline_dates.append(project.planned_end)
+
+        if project.actual_start:
+            timeline_dates.append(project.actual_start)
+
+        if project.actual_end:
+            timeline_dates.append(project.actual_end)
+
+        for project_stage in project_stages:
+
+            if project_stage.planned_start:
+                timeline_dates.append(
+                    project_stage.planned_start
+                )
+
+            if project_stage.planned_end:
+                timeline_dates.append(
+                    project_stage.planned_end
+                )
+
+            if project_stage.actual_start:
+                timeline_dates.append(
+                    project_stage.actual_start
+                )
+
+            if project_stage.actual_end:
+                timeline_dates.append(
+                    project_stage.actual_end
+                )
+
+            for work_step in project_stage.work_steps.all():
+
+                if work_step.planned_start:
+                    timeline_dates.append(
+                        work_step.planned_start
+                    )
+
+                if work_step.planned_end:
+                    timeline_dates.append(
+                        work_step.planned_end
+                    )
+
+                if work_step.actual_start:
+                    timeline_dates.append(
+                        work_step.actual_start
+                    )
+
+                if work_step.actual_end:
+                    timeline_dates.append(
+                        work_step.actual_end
+                    )
+
+        if not timeline_dates:
+            context["gantt_available"] = False
+            return context
+
+        gantt_start = min(timeline_dates)
+        gantt_end = max(timeline_dates)
+
+        gantt_total_days = (
+            gantt_end - gantt_start
+        ).days + 1
 
         # Project Summary
 
@@ -289,36 +361,138 @@ class ProjectDetailView(DetailView):
 
         for project_stage in project_stages:
 
+            # --------------------------------
+            # Development Stage row
+            # --------------------------------
+
+            stage_row = {
+                "row_type": "stage",
+                "project_stage": project_stage,
+                "label": project_stage.stage.name,
+
+                "planned_start": project_stage.planned_start,
+                "planned_end": project_stage.planned_end,
+
+                "actual_start": project_stage.actual_start,
+                "actual_end": project_stage.actual_end,
+            }
+
+
+            # Planned bar for Development Stage
+
             if (
                 project_stage.planned_start
                 and project_stage.planned_end
             ):
-                offset_days = (
+                planned_offset = (
                     project_stage.planned_start
                     - gantt_start
                 ).days
 
-                duration_days = (
+                stage_row["planned_start_column"] = (
+                    planned_offset + 3
+                )
+
+                stage_row["planned_duration"] = (
                     project_stage.planned_end
                     - project_stage.planned_start
                 ).days + 1
 
-                gantt_rows.append(
-                    {
-                        "project_stage": project_stage,
-                        "has_schedule": True,
-                        "start_column": offset_days + 3,
-                        "duration_days": duration_days,
-                    }
+
+            # Actual bar for Development Stage
+
+            if (
+                project_stage.actual_start
+                and project_stage.actual_end
+            ):
+                actual_offset = (
+                    project_stage.actual_start
+                    - gantt_start
+                ).days
+
+                stage_row["actual_start_column"] = (
+                    actual_offset + 3
                 )
 
-            else:
-                gantt_rows.append(
-                    {
-                        "project_stage": project_stage,
-                        "has_schedule": False,
-                    }
-                )
+                stage_row["actual_duration"] = (
+                    project_stage.actual_end
+                    - project_stage.actual_start
+                ).days + 1
+
+
+            # Add Development Stage to Gantt
+
+            gantt_rows.append(stage_row)
+
+
+            # --------------------------------
+            # Work Steps belonging to this stage
+            # --------------------------------
+
+            for work_step in project_stage.work_steps.all():
+
+                work_step_row = {
+                    "row_type": "work_step",
+                    "work_step": work_step,
+                    "label": work_step.title,
+
+                    "planned_start": work_step.planned_start,
+                    "planned_end": work_step.planned_end,
+
+                    "actual_start": work_step.actual_start,
+                    "actual_end": work_step.actual_end,
+                }
+
+
+                # Planned bar for Work Step
+
+                if (
+                    work_step.planned_start
+                    and work_step.planned_end
+                ):
+                    planned_offset = (
+                        work_step.planned_start
+                        - gantt_start
+                    ).days
+
+                    work_step_row[
+                        "planned_start_column"
+                    ] = planned_offset + 3
+
+                    work_step_row[
+                        "planned_duration"
+                    ] = (
+                        work_step.planned_end
+                        - work_step.planned_start
+                    ).days + 1
+
+
+                # Actual bar for Work Step
+
+                if (
+                    work_step.actual_start
+                    and work_step.actual_end
+                ):
+                    actual_offset = (
+                        work_step.actual_start
+                        - gantt_start
+                    ).days
+
+                    work_step_row[
+                        "actual_start_column"
+                    ] = actual_offset + 3
+
+                    work_step_row[
+                        "actual_duration"
+                    ] = (
+                        work_step.actual_end
+                        - work_step.actual_start
+                    ).days + 1
+
+
+                # Add Work Step directly below its Development Stage
+
+                gantt_rows.append(work_step_row)
 
         context["gantt_available"] = True
         context["gantt_start"] = gantt_start
@@ -421,3 +595,69 @@ def project_stage_attachment_upload(request, pk):
         "project-stage-detail",
         pk=project_stage.pk,
     )
+
+class WorkStepCreateView(CreateView):
+    model = WorkStep
+    form_class = WorkStepForm
+    template_name = "main/work_step_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.project_stage = get_object_or_404(
+            ProjectStage,
+            pk=self.kwargs["stage_pk"],
+        )
+
+        return super().dispatch(
+            request,
+            *args,
+            **kwargs,
+        )
+
+    def form_valid(self, form):
+        form.instance.project_stage = self.project_stage
+
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["project_stage"] = self.project_stage
+
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "project-stage-detail",
+            kwargs={
+                "pk": self.project_stage.pk,
+            },
+        )
+
+
+class WorkStepUpdateView(UpdateView):
+    model = WorkStep
+    form_class = WorkStepForm
+    template_name = "main/work_step_form.html"
+    context_object_name = "work_step"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "project-stage-detail",
+            kwargs={
+                "pk": self.object.project_stage.pk,
+            },
+        )
+
+
+class WorkStepDeleteView(DeleteView):
+    model = WorkStep
+    template_name = "main/work_step_delete.html"
+    context_object_name = "work_step"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "project-stage-detail",
+            kwargs={
+                "pk": self.object.project_stage.pk,
+            },
+        )
