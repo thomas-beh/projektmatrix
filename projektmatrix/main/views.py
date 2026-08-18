@@ -369,6 +369,7 @@ class ProjectDetailView(DetailView):
                 "row_type": "stage",
                 "project_stage": project_stage,
                 "label": project_stage.stage.name,
+                "row_id": f"stage-{project_stage.pk}",
 
                 "planned_start": project_stage.planned_start,
                 "planned_end": project_stage.planned_end,
@@ -429,12 +430,24 @@ class ProjectDetailView(DetailView):
             # Work Steps belonging to this stage
             # --------------------------------
 
-            for work_step in project_stage.work_steps.all():
+            work_steps = list(
+                project_stage.work_steps.all()
+            )
 
+            stage_row_id = f"stage-{project_stage.pk}"
+
+            for work_step in work_steps:
+
+                row_id = f"work-step-{work_step.pk}"
+
+                dependency_from = stage_row_id
                 work_step_row = {
                     "row_type": "work_step",
                     "work_step": work_step,
                     "label": work_step.title,
+
+                    "row_id": row_id,
+                    "dependency_from": dependency_from,
 
                     "planned_start": work_step.planned_start,
                     "planned_end": work_step.planned_end,

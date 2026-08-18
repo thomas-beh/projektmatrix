@@ -1,3 +1,5 @@
+{% load static %}
+
 <section class="gantt-section">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -13,6 +15,19 @@
                     –
                     {{ gantt_end|date:"Y-m-d" }}
                 </p>
+                <div class="gantt-legend mt-2">
+
+                    <span class="gantt-legend-item">
+                        <span class="gantt-legend-bar gantt-legend-planned"></span>
+                        Planned
+                    </span>
+
+                    <span class="gantt-legend-item">
+                        <span class="gantt-legend-bar gantt-legend-actual"></span>
+                        Actual
+                    </span>
+
+                </div>
             {% endif %}
         </div>
 
@@ -24,7 +39,26 @@
         <div class="gantt-scroll">
 
             <div class="gantt-chart">
-
+                <svg
+                    class="gantt-dependency-layer"
+                    aria-hidden="true"
+                >
+                    <defs>
+                        <marker
+                            id="gantt-arrowhead"
+                            markerWidth="8"
+                            markerHeight="8"
+                            refX="7"
+                            refY="4"
+                            orient="auto"
+                        >
+                            <path
+                                d="M 0 0 L 8 4 L 0 8 z"
+                                class="gantt-arrowhead"
+                            />
+                        </marker>
+                    </defs>
+                </svg>
                 <!-- Calendar Header -->
                 <div
                     class="gantt-grid gantt-header"
@@ -168,18 +202,21 @@
                                     {{ row.project_stage.stage.order }}.
                                 </span>
 
-                                {{ row.label }}
+                                <a
+                                    href="{% url 'project-stage-detail' row.project_stage.pk %}"
+                                    class="gantt-stage-link"
+                                    title="Open development stage"
+                                >
+                                    {{ row.label }}
+                                </a>
 
                             {% else %}
 
-                                <span class="gantt-work-step-marker">
-                                    ↳
+                                <span class="gantt-work-step-label">
+                                    {{ row.label }}
                                 </span>
 
-                                {{ row.label }}
-
                             {% endif %}
-
                         </div>
 
 
@@ -225,10 +262,18 @@
                         {% if row.planned_start_column %}
 
                             <div
+                                id="planned-{{ row.row_id }}"
                                 class="
                                     gantt-bar
                                     gantt-bar-planned
+
+                                    {% if row.row_type == 'stage' %}
+                                        gantt-bar-stage
+                                    {% else %}
+                                        gantt-bar-work-step
+                                    {% endif %}
                                 "
+                                data-dependency-from="{{ row.dependency_from|default:'' }}"
                                 style="
                                     grid-column:
                                     {{ row.planned_start_column }}
@@ -237,7 +282,7 @@
 
                                     grid-row: 1;
                                 "
-                                title="Planned | {{ row.planned_start|date:'Y-m-d' }} – {{ row.planned_end|date:'Y-m-d' }}"
+                                title="{{ row.label }} | Planned | {{ row.planned_start|date:'Y-m-d' }} – {{ row.planned_end|date:'Y-m-d' }}"
                             >
                             </div>
 
@@ -251,6 +296,12 @@
                                 class="
                                     gantt-bar
                                     gantt-bar-actual
+
+                                    {% if row.row_type == 'stage' %}
+                                        gantt-bar-stage
+                                    {% else %}
+                                        gantt-bar-work-step
+                                    {% endif %}
                                 "
                                 style="
                                     grid-column:
@@ -283,3 +334,5 @@
     {% endif %}
 
 </section>
+
+<script src="{% static 'main/js/gantt.js' %}"></script>
